@@ -1,4 +1,5 @@
 import 'package:async/async.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:wifi_basic/src/extensions.dart';
 
@@ -38,25 +39,26 @@ class WiFiBasic {
   WiFiBasic._();
 
   static final instance = WiFiBasic._();
-  final MethodChannel _channel = const MethodChannel('wifi_basic');
+  @visibleForTesting
+  final MethodChannel channel = const MethodChannel('wifi_basic');
   final _isSupportedMemo = AsyncMemoizer<bool>();
   final _getGenerationMemo = AsyncMemoizer<WiFiGenerations>();
 
   Future<bool> isSupported() => _isSupportedMemo
-      .runOnce(() async => await _channel.invokeMethod('isSupported'));
+      .runOnce(() async => await channel.invokeMethod('isSupported'));
 
   Future<WiFiGenerations> getGeneration() => _getGenerationMemo.runOnce(
-      () async => (await _channel.invokeMethod("getGeneration") as int?)
+      () async => (await channel.invokeMethod("getGeneration") as int?)
           .toWifiGeneration());
 
-  Future<bool> isEnabled() async => await _channel.invokeMethod('isEnabled');
+  Future<bool> isEnabled() async => await channel.invokeMethod('isEnabled');
 
   Future<bool> setEnabled(bool enabled) async =>
-      await _channel.invokeMethod('setEnabled', {"enabled": enabled});
+      await channel.invokeMethod('setEnabled', {"enabled": enabled});
 
   Future<void> openSettings() async =>
-      await _channel.invokeMethod("openSettings");
+      await channel.invokeMethod("openSettings");
 
   Future<WiFiInfo> getCurrentInfo() async =>
-      WiFiInfo._fromMap(await _channel.invokeMapMethod("getCurrentInfo") ?? {});
+      WiFiInfo._fromMap(await channel.invokeMapMethod("getCurrentInfo") ?? {});
 }
